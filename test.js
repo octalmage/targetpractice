@@ -2,30 +2,35 @@
 var test = require('tape');
 var robot = require('robotjs');
 var targetpractice = require('./index.js');
-
-robot.setMouseDelay(100);
-
 var elements;
 
+robot.setMouseDelay(100);
 
 test('Test clicking.',{timeout: 2000}, function(t)
 {
 	t.plan(1);
 
+	// Start the UI.
 	var target = targetpractice.start();
 
+	// Wait for the list of elements.
 	target.on('elements', function(elements)
 	{
+		// For this test we want a button.
 		var button_1 = elements.button_1;
+
+		// Click it!
 		robot.moveMouse(button_1.x, button_1.y);
 		robot.mouseClick();
 	});
 
+	// Alright we got a click event, did we click the button we wanted?
 	target.on('click', function(element)
 	{
 		t.equal(element.id, "button_1", 'Confirm button_1 was clicked.');
 	});
 
+	// Close the UI.
 	t.on("end", function()
 	{
 		targetpractice.stop();
@@ -47,6 +52,7 @@ test('Test typing.',{timeout: 5000}, function(t)
 		robot.typeString(stringToType);
 	});
 
+	// Currently Target Practice waits for the "user" to finish typing before sending the event.
 	target.on('type', function(element)
 	{
 		t.equal(element.id, "input_1", 'Confirm input_1 was used.');
