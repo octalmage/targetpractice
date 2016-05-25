@@ -7,13 +7,35 @@ var doneTypingInterval = 500;
 
 $('#fixture button').on('click', (event) =>
 {
-	ipc.send('click', {id: event.target.id});
+	ipc.send('event',
+	{
+		id: event.target.id,
+		type: 'click'
+	});
+});
+
+$('#fixture button').on('mousedown', (event) =>
+{
+	ipc.send('event',
+	{
+		id: event.target.id,
+		type: 'mousedown'
+	});
+});
+
+$('#fixture button').on('mouseup', (event) =>
+{
+	ipc.send('event',
+	{
+		id: event.target.id,
+		type: 'mouseup'
+	});
 });
 
 // Logic to send text when the "user" is finished typing.
 $('#fixture input').on('keydown', (event) =>
 {
-	 clearTimeout(typingTimer);
+	clearTimeout(typingTimer);
 });
 
 $('#fixture input').on('keyup', (event) =>
@@ -26,9 +48,11 @@ $('#fixture input').on('keyup', (event) =>
 		// It's been enough time they're probably finished.
 		if ($(event.target).val())
 		{
-			ipc.send('type', {
+			ipc.send('event',
+			{
 				id: event.target.id,
-				text: $(event.target).val()
+				text: $(event.target).val(),
+				type: 'type'
 			});
 		}
 	}, doneTypingInterval);
@@ -38,7 +62,7 @@ $('#fixture input').on('keyup', (event) =>
 ipc.on('elements', () =>
 {
 	var elements = {};
-	$( "#fixture" ).children().each(function ()
+	$("#fixture").children().each(function()
 	{
 		elements[$(this).attr('id')] = getInfo($(this)[0]);
 
@@ -46,7 +70,8 @@ ipc.on('elements', () =>
 	ipc.send('elements', elements);
 });
 
-function getInfo( el ) {
+function getInfo(el)
+{
 	return {
 		x: el.offsetLeft + (el.offsetWidth / 2),
 		y: el.offsetTop + (el.offsetHeight / 2)

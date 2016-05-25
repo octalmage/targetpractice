@@ -8,7 +8,7 @@ robot.setMouseDelay(100);
 
 test('Test clicking.',{timeout: 2000}, function(t)
 {
-	t.plan(1);
+	t.plan(2);
 
 	// Start the UI.
 	var target = targetpractice.start();
@@ -25,9 +25,10 @@ test('Test clicking.',{timeout: 2000}, function(t)
 	});
 
 	// Alright we got a click event, did we click the button we wanted?
-	target.on('click', function(element)
+	target.on('click', function(e)
 	{
-		t.equal(element.id, "button_1", 'Confirm button_1 was clicked.');
+		t.equal(e.id, "button_1", 'Confirm button_1 was clicked.');
+		t.equal(e.type, "click", 'Confirm event was a click.');
 	});
 
 	// Close the UI.

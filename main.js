@@ -22,19 +22,14 @@ app.on('ready', function()
 
 	window.webContents.on('did-finish-load', function()
 	{
-		ipc.on('elements', function(event, elements)
+		ipc.on('event', function(event, message)
 		{
-			send("elements", addToElements(elements));
+			send(message.type, message);
 		});
-
-		ipc.on('click', function(event, contents)
+		
+		ipc.on('elements', function(event, message)
 		{
-			send('click', contents);
-		});
-
-		ipc.on('type', function(event, contents)
-		{
-			send('type', contents);
+			send('elements', addToElements(message));
 		});
 
 		window.webContents.send('elements');

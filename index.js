@@ -14,10 +14,23 @@ module.exports.start = function start()
 
 	targetpractice.stdout.on('data', function(data)
 	{
-		var msg = JSON.parse(data.toString('utf8'));
-
-		emitter.emit(msg.event, msg.message);
-
+		var messages = data.toString('utf8').split("\n");
+		for (var x in messages)
+		{
+			if (messages[x])
+			{
+				try
+				{
+					var msg = JSON.parse(messages[x]);
+					emitter.emit(msg.event, msg.message);
+				}
+				catch (e)
+				{
+					console.log("Couldn't decode JSON:");
+					console.log(messages.toString('utf8'));
+				}
+			}
+		}
 	});
 
 	return emitter;
