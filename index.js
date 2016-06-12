@@ -14,21 +14,19 @@ module.exports.start = function start()
 
 	targetpractice.stdout.on('data', function(data)
 	{
-		var messages = data.toString('utf8').split("\n");
+		// We could have multiple messages, split on newline and remove empty strings.
+		var messages = data.toString('utf8').split("\n").filter(function(x) { return x.length !== 0; });
 		for (var x in messages)
 		{
-			if (messages[x])
+			try
 			{
-				try
-				{
-					var msg = JSON.parse(messages[x]);
-					emitter.emit(msg.event, msg.message);
-				}
-				catch (e)
-				{
-					console.log("Couldn't decode JSON:");
-					console.log(messages.toString('utf8'));
-				}
+				var msg = JSON.parse(messages[x]);
+				emitter.emit(msg.event, msg.message);
+			}
+			catch (e)
+			{
+				console.log("Couldn't decode JSON:");
+				console.log(messages.toString('utf8'));
 			}
 		}
 	});
