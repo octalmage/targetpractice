@@ -1,9 +1,10 @@
 /*jshint esversion: 6 */
 var ipc = require('electron').ipcRenderer;
 
-var typingTimer;
+var typingTimer, scrollingTimer;
 // The amount of time to wait before sending the contents of an input.
 var doneTypingInterval = 500;
+var doneScrollingInterval = 500;
 
 $('#fixture button').on('click', (event) =>
 {
@@ -60,13 +61,20 @@ $('#fixture input').on('keyup', (event) =>
 });
 
 $('#fixture textarea').on('scroll', (event) => {
-	ipc.send('event',
+	// They started typing again, clear the timer.
+	clearTimeout(scrollingTimer);
+	// Restart the timer!
+	scrollingTimer = setTimeout(() =>
 	{
-		id: event.target.id,
-		type: 'scroll',
-		scroll_y: event.target.scrollTop,
-		scroll_x: event.target.scrollLeft,
-	});
+		// It's been enough time they're probably finished.
+		ipc.send('event',
+		{
+			id: event.target.id,
+			type: 'scroll',
+			scroll_y: event.target.scrollTop,
+			scroll_x: event.target.scrollLeft,
+		});
+	}, doneScrollingInterval);
 });
 
 ipc.on('elements', () =>
