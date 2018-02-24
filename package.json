@@ -2,18 +2,15 @@
 	"name": "TargetPractice",
 	"version": "0.0.1",
 	"main": "main.js",
-	"dependencies":
-	{
+	"dependencies": {
 		"electron-prebuilt": "^1.1.1",
-		"jquery": "^2.2.4"
+		"jquery": "^3.0.0"
 	},
-	"devDependencies":
-	{
+	"devDependencies": {
 		"tape": "^4.5.1",
 		"robotjs": "^0.4.2"
 	},
-	"scripts":
-	{
+	"scripts": {
 		"start": "electron main.js",
 		"test": "node test.js"
 	}
