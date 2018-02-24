@@ -59,6 +59,16 @@ $('#fixture input').on('keyup', (event) =>
 
 });
 
+$('#fixture textarea').on('scroll', (event) => {
+	ipc.send('event',
+	{
+		id: event.target.id,
+		type: 'scroll',
+		scroll_y: event.target.scrollTop,
+		scroll_x: event.target.scrollLeft,
+	});
+});
+
 ipc.on('elements', () =>
 {
 	var elements = {};

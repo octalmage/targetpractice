@@ -38,7 +38,7 @@ test('Test clicking.',{timeout: 2000}, function(t)
 	});
 });
 
-test('Test typing.',{timeout: 5000}, function(t)
+test('Test typing.',{ timeout: 5000 }, function(t)
 {
 	t.plan(2);
 
@@ -66,3 +66,28 @@ test('Test typing.',{timeout: 5000}, function(t)
 	});
 });
 
+test('Test scrolling.',{ timeout: 2000 }, function(t)
+{
+	t.plan(2);
+
+	var target = targetpractice.start();
+
+	target.on('elements', function(elements)
+	{
+		var textarea_1 = elements.textarea_1;
+		robot.moveMouse(textarea_1.x, textarea_1.y);
+		robot.mouseClick();
+		robot.scrollMouse(0, -10);
+	});
+
+	target.on('scroll', function(element)
+	{
+		t.equal(element.id, 'textarea_1', 'Confirm textarea_1 was used.');
+		t.equal(element.scroll_y, 10, 'Confirm scroll to 10.');
+	});
+
+	t.on('end', function()
+	{
+		targetpractice.stop();
+	});
+});
