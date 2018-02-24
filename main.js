@@ -1,7 +1,7 @@
 /*jshint esversion: 6 */
 const electron = require('electron');
 
-const {app, BrowserWindow, ipcMain: ipc} = electron;
+const { app, BrowserWindow, ipcMain: ipc } = electron;
 
 var window = null;
 
@@ -26,7 +26,7 @@ app.on('ready', function()
 		{
 			send(message.type, message);
 		});
-		
+
 		ipc.on('elements', function(event, message)
 		{
 			send('elements', addToElements(message));

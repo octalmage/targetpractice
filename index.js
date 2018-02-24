@@ -1,13 +1,14 @@
 var spawn = require('child_process').spawn;
 var EventEmitter = require('events').EventEmitter;
-
+var path = require('path');
 var targetpractice = null;
+var electron = require('electron');
 
 module.exports.start = function start()
 {
 	var emitter = new EventEmitter();
 
-	targetpractice = spawn('electron', ['.'],
+	targetpractice = spawn(electron, [__dirname],
 	{
 		detached: true
 	});
