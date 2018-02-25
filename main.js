@@ -32,7 +32,9 @@ app.on('ready', function()
 			send('elements', addToElements(message));
 		});
 
-		window.webContents.send('elements');
+		// TODO: There has to be a better way to prevent the visual flash. It
+		// breaks the screen related tests.
+		setTimeout(() => window.webContents.send('elements'), 100);
 	});
 
 	// Emitted when the window is closed.
