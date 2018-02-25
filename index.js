@@ -3,6 +3,7 @@ var EventEmitter = require('events').EventEmitter;
 var path = require('path');
 var targetpractice = null;
 var electron = require('electron');
+var endOfLine = require('os').EOL;
 
 module.exports.start = function start()
 {
@@ -16,7 +17,7 @@ module.exports.start = function start()
 	targetpractice.stdout.on('data', function(data)
 	{
 		// We could have multiple messages, split on newline and remove empty strings.
-		var messages = data.toString('utf8').split("\n").filter(function(x) { return x.length !== 0; });
+		var messages = data.toString('utf8').split(endOfLine).filter(function(x) { return x.length !== 0; });
 		for (var x in messages)
 		{
 			try
@@ -39,11 +40,8 @@ module.exports.stop = function stop()
 {
 	if (targetpractice !== null)
 	{
-		/**
-		 * Kill the process, technique described below:
-		 * http://azimi.me/2014/12/31/kill-child_process-node-js.html
-		 */
-		process.kill(-targetpractice.pid);
+		targetpractice.stdin.pause();
+		targetpractice.kill();
 		targetpractice = null;
 	}
     else
