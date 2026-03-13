@@ -3,6 +3,9 @@ const { app, BrowserWindow, ipcMain, screen } = require('electron');
 
 let window = null;
 
+app.commandLine.appendSwitch('force-color-profile', 'srgb');
+app.commandLine.appendSwitch('force-raster-color-profile', 'srgb');
+
 ipcMain.on('event', (event, message) =>
 {
 	send(message.type, message);
