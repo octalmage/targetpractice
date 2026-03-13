@@ -1,14 +1,16 @@
 {
-	"name": "targetpractice",
-	"version": "0.0.7",
-	"main": "main.js",
-	"devDependencies": {
-		"electron": "^35.0.0",
-		"robotjs": "^0.7.0",
-		"tape": "^5.9.0"
-	},
-	"scripts": {
-		"start": "electron main.js",
-		"test": "node test.js"
-	}
+  "name": "targetpractice",
+  "version": "0.0.7",
+  "main": "main.js",
+  "dependencies": {
+    "electron": "^35.7.5"
+  },
+  "devDependencies": {
+    "robotjs": "^0.7.0",
+    "tape": "^5.9.0"
+  },
+  "scripts": {
+    "start": "electron main.js",
+    "test": "node test.js"
+  }
 }
