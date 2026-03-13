@@ -1,50 +1,62 @@
-/*jshint esversion: 6 */
-const electron = require('electron');
+const path = require('path');
+const { app, BrowserWindow, ipcMain, screen } = require('electron');
 
-const { app, BrowserWindow, ipcMain: ipc } = electron;
+let window = null;
 
-var window = null;
-
-app.on('ready', function()
+ipcMain.on('event', (event, message) =>
 {
-	const electronScreen = electron.screen;
+	send(message.type, message);
+});
 
-	// Create the window
-	const {width, height} = electronScreen.getPrimaryDisplay().workAreaSize;
+ipcMain.on('elements', (event, message) =>
+{
+	send('elements', addToElements(message));
+});
 
-	window = new BrowserWindow(
-	{
-		width: width,
-		height: height,
+function createWindow()
+{
+	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
+
+	window = new BrowserWindow({
+		x: 0,
+		y: 0,
+		width,
+		height,
 		frame: false,
-		alwaysOnTop: true
+		alwaysOnTop: true,
+		acceptFirstMouse: true,
+		webPreferences: {
+			contextIsolation: true,
+			nodeIntegration: false,
+			preload: path.join(__dirname, 'preload.js')
+		}
 	});
 
-	window.webContents.on('did-finish-load', function()
+	window.webContents.on('did-finish-load', () =>
 	{
-		ipc.on('event', function(event, message)
-		{
-			send(message.type, message);
-		});
-
-		ipc.on('elements', function(event, message)
-		{
-			send('elements', addToElements(message));
-		});
+		app.focus({ steal: true });
+		window.moveTop();
+		window.focus();
 
 		// TODO: There has to be a better way to prevent the visual flash. It
 		// breaks the screen related tests.
 		setTimeout(() => window.webContents.send('elements'), 100);
 	});
 
-	// Emitted when the window is closed.
-	window.on('closed', function()
+	window.on('closed', () =>
 	{
+		window = null;
 		app.quit();
 	});
 
-	// and load the index.html of the app.
-	window.loadURL('file://' + __dirname + '/index.html');
+	window.loadFile(path.join(__dirname, 'index.html'));
+}
+
+app.whenReady().then(createWindow);
+
+app.on('window-all-closed', () =>
+{
+	app.quit();
 });
 
 /**
@@ -76,8 +88,8 @@ function send(event, msg)
  */
 function addToElements(elements)
 {
-	let winPos = window.getPosition();
-	for (let x in elements)
+	const winPos = window.getPosition();
+	for (const x in elements)
 	{
 		elements[x].x += winPos[0];
 		elements[x].y += winPos[1];

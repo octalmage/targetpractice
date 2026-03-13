@@ -50,7 +50,7 @@ test('Test typing.',{ timeout: 5000 }, function(t)
 		var input_1 = elements.input_1;
 		robot.moveMouse(input_1.x, input_1.y);
 		robot.mouseClick();
-		robot.typeString(stringToType);
+		robot.typeStringDelayed(stringToType, 1000);
 	});
 
 	// Currently Target Practice waits for the "user" to finish typing before sending the event.

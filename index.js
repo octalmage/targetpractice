@@ -1,23 +1,25 @@
 var spawn = require('child_process').spawn;
 var EventEmitter = require('events').EventEmitter;
-var path = require('path');
 var targetpractice = null;
 var electron = require('electron');
-var endOfLine = require('os').EOL;
 
 module.exports.start = function start()
 {
 	var emitter = new EventEmitter();
+	var stdoutBuffer = '';
 
 	targetpractice = spawn(electron, [__dirname],
 	{
-		detached: true
+		detached: false,
+		stdio: ['ignore', 'pipe', 'pipe']
 	});
 
 	targetpractice.stdout.on('data', function(data)
 	{
-		// We could have multiple messages, split on newline and remove empty strings.
-		var messages = data.toString('utf8').split(endOfLine).filter(function(x) { return x.length !== 0; });
+		stdoutBuffer += data.toString('utf8');
+		var messages = stdoutBuffer.split(/\r?\n/);
+		stdoutBuffer = messages.pop();
+
 		for (var x in messages)
 		{
 			try
@@ -28,7 +30,7 @@ module.exports.start = function start()
 			catch (e)
 			{
 				console.log("Couldn't decode JSON:");
-				console.log(messages.toString('utf8'));
+				console.log(messages[x]);
 			}
 		}
 	});
@@ -40,12 +42,15 @@ module.exports.stop = function stop()
 {
 	if (targetpractice !== null)
 	{
-		targetpractice.stdin.pause();
+		if (targetpractice.stdin)
+		{
+			targetpractice.stdin.pause();
+		}
 		targetpractice.kill();
 		targetpractice = null;
 	}
-    else
-    {
-        console.log("No process.");
-    }
+	else
+	{
+		console.log("No process.");
+	}
 };
