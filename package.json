@@ -1,6 +1,6 @@
 {
   "name": "targetpractice",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "main": "main.js",
   "dependencies": {
     "electron": "^35.7.5"

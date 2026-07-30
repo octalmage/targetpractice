@@ -2,6 +2,19 @@ const path = require('path');
 const { app, BrowserWindow, ipcMain, screen } = require('electron');
 
 let window = null;
+let applicationActive = process.platform !== 'darwin';
+
+if (process.platform === 'darwin')
+{
+	app.on('did-become-active', () =>
+	{
+		applicationActive = true;
+	});
+	app.on('did-resign-active', () =>
+	{
+		applicationActive = false;
+	});
+}
 
 app.commandLine.appendSwitch('force-color-profile', 'srgb');
 app.commandLine.appendSwitch('force-raster-color-profile', 'srgb');
@@ -13,18 +26,23 @@ ipcMain.on('event', (event, message) =>
 
 ipcMain.on('elements', (event, message) =>
 {
-	send('elements', addToElements(message));
+	if (!window || window.isDestroyed() || event.sender !== window.webContents)
+	{
+		return;
+	}
+
+	reportAfterPresentedFrame(window, message);
 });
 
-function createWindow()
+async function createWindow()
 {
 	const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-
-	window = new BrowserWindow({
+	const targetWindow = new BrowserWindow({
 		x: 0,
 		y: 0,
 		width,
 		height,
+		show: false,
 		frame: false,
 		alwaysOnTop: true,
 		acceptFirstMouse: true,
@@ -35,27 +53,96 @@ function createWindow()
 		}
 	});
 
-	window.webContents.on('did-finish-load', () =>
+	window = targetWindow;
+	targetWindow.on('closed', () =>
 	{
-		app.focus({ steal: true });
-		window.moveTop();
-		window.focus();
-
-		// TODO: There has to be a better way to prevent the visual flash. It
-		// breaks the screen related tests.
-		setTimeout(() => window.webContents.send('elements'), 100);
-	});
-
-	window.on('closed', () =>
-	{
-		window = null;
+		if (window === targetWindow)
+		{
+			window = null;
+		}
 		app.quit();
 	});
 
-	window.loadFile(path.join(__dirname, 'index.html'));
+	const readyToShow = new Promise(resolve =>
+	{
+		targetWindow.once('ready-to-show', resolve);
+	});
+
+	await Promise.all([
+		targetWindow.loadFile(path.join(__dirname, 'index.html')),
+		readyToShow
+	]);
+
+	await showAndFocus(targetWindow);
+	targetWindow.webContents.send('elements');
 }
 
-app.whenReady().then(createWindow);
+async function showAndFocus(targetWindow)
+{
+	const shown = new Promise(resolve =>
+	{
+		targetWindow.once('show', resolve);
+	});
+	const focused = new Promise(resolve =>
+	{
+		targetWindow.once('focus', resolve);
+	});
+	const active = waitForApplicationActivation();
+
+	targetWindow.showInactive();
+	await shown;
+	targetWindow.moveTop();
+	app.focus({ steal: true });
+	targetWindow.focus();
+	await Promise.all([focused, active]);
+	targetWindow.focusOnWebView();
+	targetWindow.webContents.focus();
+}
+
+function waitForApplicationActivation()
+{
+	if (applicationActive)
+	{
+		return Promise.resolve();
+	}
+
+	return new Promise(resolve =>
+	{
+		app.once('did-become-active', resolve);
+	});
+}
+
+function reportAfterPresentedFrame(targetWindow, elements)
+{
+	const contents = targetWindow.webContents;
+	let reported = false;
+
+	contents.beginFrameSubscription(() =>
+	{
+		if (
+			reported ||
+			contents.isDestroyed() ||
+			!contents.isFocused() ||
+			!applicationActive ||
+			!targetWindow.isVisible() ||
+			!targetWindow.isFocused()
+		)
+		{
+			return;
+		}
+
+		reported = true;
+		contents.endFrameSubscription();
+		send('elements', addToElements(elements, targetWindow));
+	});
+	contents.invalidate();
+}
+
+app.whenReady().then(createWindow).catch(error =>
+{
+	console.error('Target Practice failed to create the fixture window:', error);
+	app.exit(1);
+});
 
 app.on('window-all-closed', () =>
 {
@@ -88,10 +175,11 @@ function send(event, msg)
 /**
  * Pad element positions using the Window's absolute position as an offset.
  * @param object elements An object containing the elements and their positions.
+ * @param BrowserWindow targetWindow The window containing the elements.
  */
-function addToElements(elements)
+function addToElements(elements, targetWindow)
 {
-	const winPos = window.getPosition();
+	const winPos = targetWindow.getPosition();
 	for (const x in elements)
 	{
 		elements[x].x += winPos[0];

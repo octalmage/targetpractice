@@ -3,7 +3,7 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('targetPractice', {
 	onElements(listener)
 	{
-		ipcRenderer.on('elements', () => listener());
+		ipcRenderer.once('elements', () => listener());
 	},
 	sendEvent(message)
 	{
