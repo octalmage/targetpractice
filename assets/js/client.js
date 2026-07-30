@@ -72,7 +72,7 @@ function getInfo(el)
 {
 	const bounds = el.getBoundingClientRect();
 	return {
-		x: bounds.left + (bounds.width / 2),
-		y: bounds.top + (bounds.height / 2)
+		x: Math.round(bounds.left + (bounds.width / 2)),
+		y: Math.round(bounds.top + (bounds.height / 2))
 	};
 }

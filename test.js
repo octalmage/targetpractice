@@ -304,6 +304,14 @@ test('Start resolves with rendered absolute element coordinates.', { timeout: 10
 	{
 		t.ok(session.elements.button_1, 'Button coordinates are available at resolution.');
 		t.ok(session.elements.input_1, 'Input coordinates are available at resolution.');
+		for (var elementName in session.elements)
+		{
+			t.ok(
+				Number.isInteger(session.elements[elementName].x) &&
+				Number.isInteger(session.elements[elementName].y),
+				elementName + ' reports integer screen coordinates.'
+			);
+		}
 		var color = session.elements.color_1;
 		var targetColor = robot.getPixelColor(color.x, color.y);
 		var backgroundColor = robot.getPixelColor(color.x, color.y + 100);
