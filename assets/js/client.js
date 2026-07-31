@@ -1,8 +1,3 @@
-let typingTimer;
-let scrollingTimer;
-// The amount of time to wait before sending the contents of an input.
-const doneTypingInterval = 500;
-const doneScrollingInterval = 500;
 const fixture = document.getElementById('fixture');
 
 for (const button of fixture.querySelectorAll('button'))
@@ -36,18 +31,11 @@ for (const input of fixture.querySelectorAll('input'))
 {
 	input.addEventListener('input', (event) =>
 	{
-		clearTimeout(typingTimer);
-		typingTimer = setTimeout(() =>
-		{
-			if (event.target.value)
-			{
-				window.targetPractice.sendEvent({
-					id: event.target.id,
-					text: event.target.value,
-					type: 'type'
-				});
-			}
-		}, doneTypingInterval);
+		window.targetPractice.sendEvent({
+			id: event.currentTarget.id,
+			text: event.currentTarget.value,
+			type: 'type'
+		});
 	});
 }
 
@@ -55,33 +43,36 @@ for (const textarea of fixture.querySelectorAll('textarea'))
 {
 	textarea.addEventListener('scroll', (event) =>
 	{
-		clearTimeout(scrollingTimer);
-		scrollingTimer = setTimeout(() =>
-		{
-			window.targetPractice.sendEvent({
-				id: event.target.id,
-				type: 'scroll',
-				scroll_y: event.target.scrollTop,
-				scroll_x: event.target.scrollLeft
-			});
-		}, doneScrollingInterval);
+		window.targetPractice.sendEvent({
+			id: event.currentTarget.id,
+			type: 'scroll',
+			scroll_y: event.currentTarget.scrollTop,
+			scroll_x: event.currentTarget.scrollLeft
+		});
 	});
 }
 
 window.targetPractice.onElements(() =>
 {
-	const elements = {};
-	for (const child of fixture.children)
+	requestAnimationFrame(() =>
 	{
-		elements[child.id] = getInfo(child);
-	}
-	window.targetPractice.sendElements(elements);
+		requestAnimationFrame(() =>
+		{
+			const elements = {};
+			for (const child of fixture.children)
+			{
+				elements[child.id] = getInfo(child);
+			}
+			window.targetPractice.sendElements(elements);
+		});
+	});
 });
 
 function getInfo(el)
 {
+	const bounds = el.getBoundingClientRect();
 	return {
-		x: el.offsetLeft + (el.offsetWidth / 2),
-		y: el.offsetTop + (el.offsetHeight / 2)
+		x: Math.round(bounds.left + (bounds.width / 2)),
+		y: Math.round(bounds.top + (bounds.height / 2))
 	};
 }

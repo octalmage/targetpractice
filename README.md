@@ -3,13 +3,27 @@ Target Practice
 
 > Test UI automation tools using Node.js.
 
-Target Practice is a tool that will allow you to test UI automation tools. It's a cross platform GUI that will send detected events like clicking/typing back to your tests over stdout.
+Target Practice is a cross-platform GUI fixture that reports clicking, typing, and scrolling events to Node.js tests.
 
-See [test.js](test.js) as an example.
+## Usage
+
+```js
+const targetpractice = require('targetpractice');
+
+const target = await targetpractice.start();
+
+target.elements;
+target.on('click', handler);
+target.on('type', handler);
+target.on('scroll', handler);
+
+await target.stop();
+```
+
+`start()` resolves after the fixture is shown, focused, has rendered a post-show frame, and has reported absolute integer coordinates through `target.elements`. Type and scroll events are emitted for every state change, so consumers should wait for the state they expect. `target.stop()` is idempotent and resolves only after the owned Electron process and its stdio have closed.
+
+See [test.js](test.js) for complete interaction and teardown examples.
 
 ## Story
 
-I've been working on [RobotJS](https://github.com/octalmage/robotjs) which allows you to control the mouse and keyboard.
-For a while now I've been trying to find a way to test this. How do you confirm
-that the mouse was clicked, or that a string was typed? I've been looking for an
-independent tool to help me do this. It doesn't exist, so I created Target Practice.
+Target Practice was created to test [RobotJS](https://github.com/octalmage/robotjs) mouse, keyboard, and screen automation against an independent GUI fixture.
