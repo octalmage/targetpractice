@@ -31,7 +31,21 @@ ipcMain.on('elements', (event, message) =>
 		return;
 	}
 
-	reportAfterPresentedFrame(window, message);
+	// macOS needs native presentation before system input is accepted. Elsewhere,
+	// the renderer's two frames avoid a GPU-dependent subscription under Xvfb.
+	if (process.platform === 'darwin')
+	{
+		reportAfterPresentedFrame(window, message);
+	}
+	else if (
+		applicationActive &&
+		window.isVisible() &&
+		window.isFocused() &&
+		window.webContents.isFocused()
+	)
+	{
+		send('elements', addToElements(message, window));
+	}
 });
 
 async function createWindow()
