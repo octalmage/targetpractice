@@ -7,7 +7,7 @@ var inherits = require('util').inherits;
 var childProcess = require('child_process');
 var test = require('tape');
 var robot = require('robotjs');
-var targetpractice = require('./index.js');
+var targetpractice = require('targetpractice');
 
 robot.setMouseDelay(100);
 

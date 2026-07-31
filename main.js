@@ -89,10 +89,10 @@ async function showAndFocus(targetWindow)
 	});
 	const active = waitForApplicationActivation();
 
+	app.focus({ steal: true });
 	targetWindow.showInactive();
 	await shown;
 	targetWindow.moveTop();
-	app.focus({ steal: true });
 	targetWindow.focus();
 	await Promise.all([focused, active]);
 	targetWindow.focusOnWebView();

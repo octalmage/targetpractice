@@ -8,7 +8,7 @@ Target Practice is a cross-platform GUI fixture that reports clicking, typing, a
 ## Usage
 
 ```js
-const targetpractice = require('targetpractice/index.js');
+const targetpractice = require('targetpractice');
 
 const target = await targetpractice.start();
 

@@ -3,6 +3,7 @@
 var spawn = require('child_process').spawn;
 var EventEmitter = require('events').EventEmitter;
 var os = require('os');
+var path = require('path');
 var electron = require('electron');
 
 var READINESS_TIMEOUT_MS = 15000;
@@ -408,7 +409,7 @@ module.exports.start = function start()
 		args.push('--no-sandbox', '--disable-setuid-sandbox');
 	}
 
-	args.push(__dirname);
+	args.push(path.join(__dirname, 'electron-app'));
 	var command = describeCommand(electron, args);
 	var child;
 
